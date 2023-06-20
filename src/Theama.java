@@ -1,4 +1,18 @@
+import java.util.ArrayList;
+
 public class Theama {
+
+    ArrayList<Object> actorList = new ArrayList<>(); //lists all actors
+
+    public ArrayList<Object> getActorList() {
+        return actorList;
+    }
+
+    ArrayList<director> directorList = new ArrayList<>(); //lists all directors
+
+    public ArrayList<director> getDirectorList() {
+        return directorList;
+    }
 
 
     public String getTitle() {
@@ -33,40 +47,37 @@ public class Theama {
         this.country = country;
     }
 
-    public String getDirector() {
+    public Object getDirector() {
         return director;
     }
 
-
-
-
-
-    public void setActors(String[] actors) {
-        this.actors = actors;
+    public Object getActors() {
+        return actors;
     }
 
-    public String getVtype() {
-        return vtype;
+    public String getShowType() {
+        return showType;
     }
 
-    public void setVtype(String vtype) {
-        this.vtype = vtype;
+    public void setShowType(String showType) {
+        this.showType = showType;
     }
 
-    String vtype;
+    String showType;
     String title;
     String release_year;
-    String[] TagType = new String[0];
+    String[] TagType;
     String country;
-    String director;
-    String[] actors = new String[0];
+    Object director;
+    Object[] actors;
 
 
-    class series extends Theama{
+    static class series extends Theama {
 
         int seasons;
         int episodes;
         String last_air;
+
         public int getSeasons() {
             return seasons;
         }
@@ -92,9 +103,34 @@ public class Theama {
         }
     }
 
+    public void newDirector(String name,String website,String b_country){
+
+        director director = new director();
+        director.setB_country(b_country);
+        director.setName(name);
+        director.setWebsite(website);
+        directorList.add(director);
+
+    }
+
+    public void newActor(String name,String website,String b_country){
+
+        actor actor = new actor();
+        actor.setB_country(b_country);
+        actor.setName(name);
+        actor.setWebsite(website);
+        actorList.add(actor);
+
+    }
+
+
+}
+
 
     class director{
 
+
+        int id;
         String name;
         String website;
         String b_country;
@@ -123,13 +159,30 @@ public class Theama {
             this.b_country = b_country;
         }
 
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
 
     }
 
     class actor{
+
+        int id;
         String name;
         String website;
         String b_country;
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
 
         public String getName() {
             return name;
@@ -156,4 +209,4 @@ public class Theama {
         }
 
     }
-}
+

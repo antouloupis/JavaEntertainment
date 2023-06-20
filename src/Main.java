@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
@@ -22,12 +23,18 @@ public class Main {
 
     private void newView() {
 
+
+        Theama theama = new Theama();
+        ArrayList<director> directorList = theama.getDirectorList();
+        ArrayList<Object> actorsList = theama.getActorList();
+
+
         String type;
         String title;
         String release_year;
         String[] TagType = new String[0];
         String country;
-        String director;
+        director localDirector = new director();
         String[] actors = new String[0];
         String answer;
 
@@ -35,6 +42,7 @@ public class Main {
                 System.out.println("What type of viewing is it?(Film/Series/Miniseries)");
                 type = sc.nextLine();
         } while(type != "Film" || type!= "Series" || type!= "Miniseries");
+
 
         System.out.println("What is the title of the " + type);
         title = sc.nextLine();
@@ -68,7 +76,20 @@ public class Main {
         country = sc.nextLine();
 
         System.out.println("Who directed " + title + "?");
-        director = sc.nextLine();
+        localDirector.name = sc.nextLine();
+
+        int id = -1;
+
+        for (director obj : directorList ) {
+            if(obj.getName() == localDirector.name){
+                id = obj.getId();
+                break;
+            }
+        }
+
+        if(id != -1) {
+
+        }
 
         System.out.println("Name some of the actors playing in " + title);
 
@@ -91,17 +112,17 @@ public class Main {
             }
         }
 
-        if (type=="Film") {
-            Theama theama = new Theama();
+        if (type=="Series" || type=="Miniseries") {
+            Theama.series series = new Theama.series();
+            series.setTagType(TagType);
+            series.setCountry(country);
+            series.setTitle(title);
+            series.setRelease_year(release_year);
 
-            theama.setTagType(TagType);
-            theama.setActors(actors);
-            theama.setCountry(country);
-            theama.setTitle(title);
-
-            theama.setRelease_year(release_year);
 
         } else {
+
+
 
         }
 
