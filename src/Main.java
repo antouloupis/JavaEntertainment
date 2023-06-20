@@ -34,8 +34,12 @@ public class Main {
         String release_year;
         String[] TagType = new String[0];
         String country;
-        director localDirector = new director();
-        String[] actors = new String[0];
+        String directorName;
+        String directorWebsite;
+        String directorBCountry;
+        String actorName;
+        String actorWebsite;
+        String actorBCountry;
         String answer;
 
         do {
@@ -77,17 +81,32 @@ public class Main {
 
         System.out.println("Who directed " + title + "?");
         localDirector.name = sc.nextLine();
+        localDirector.name.toUpperCase();
 
-        int id = -1;
+        localDirector.id = -1;
+        int counter = 0;
 
         for (director obj : directorList ) {
             if(obj.getName() == localDirector.name){
-                id = obj.getId();
+
+                localDirector.website = obj.getWebsite();
+                localDirector.b_country = obj.getB_country();
+                localDirector.id = obj.getId();
                 break;
             }
+            counter++;
         }
 
-        if(id != -1) {
+        if (localDirector.id == -1){
+            System.out.println("Where was " + localDirector.name + "born?");
+            localDirector.b_country = sc.nextLine();
+            localDirector.b_country.toUpperCase();
+
+            System.out.println("What is " + name + "'s website?");
+            localDirector.website = sc.nextLine();
+            localDirector.website.toUpperCase();
+
+            localDirector.setWebsite(localDirector.website);
 
         }
 
@@ -97,8 +116,7 @@ public class Main {
         flag = true;
         while(i < 10 && flag) { //check if user wants to add another actor
             System.out.println("What is the person's name?");
-            TagType[i] = sc.nextLine();
-            TagType[i].toUpperCase();
+
             System.out.println("Actor added");
 
 
