@@ -2,37 +2,41 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
-    Scanner sc = new Scanner(System.in);
-    ArrayList<director> directorList = new ArrayList();
-    ArrayList<actor> actorsList = new ArrayList<>();
-    ArrayList<Theama> theamata = new ArrayList<>();
+
+    private static Scanner sc = new Scanner(System.in);
+    private static ArrayList<director> directorList = new ArrayList();
+    private ArrayList<actor> actorsList = new ArrayList<>();
+    private ArrayList<Theama> theamata = new ArrayList<>();
 
 
-    public void main(String[] args) {
+    public static void main(String[] args) {
 
         System.out.println("What would you like to do?\n");
         int choice;
         do {
-            System.out.println("1.Add new viewing\n2.Update viewing\n3.Search and rate\n4.Search for actor or director\n");
+            System.out.println("1.Add new viewing\n2.Update viewing\n3.Search and rate\n4.Search for actor or director");
             choice = sc.nextInt();
         } while (choice < 1 || choice > 4);
+
         switch (choice){
             case(1):
                 newView();
 
+            default:
+                System.out.println("end");
+
 
 
         }
+
     }
 
-    private void newView() {
-
-
+    private static void newView() {
 
         String type;
         String title;
         int release_year;
-        String[] TagType = new String[0];
+        String[] TagType = new String[3];
         String country;
         String directorName;
         String directorWebsite = "";
@@ -48,51 +52,62 @@ public class Main {
         ArrayList<actor> movieActors = new ArrayList<>();
 
         do {
-                System.out.println("What type of viewing is it?(Film/Series/Miniseries)");
-                type = sc.nextLine();
-        } while(type != "Film" || type!= "Series" || type!= "Miniseries");
+                System.out.println("What type of viewing is it?(FILM/SERIES/MINISERIES)");
+                sc.nextLine(); //to NOT read null in first try
+                type = sc.nextLine().toUpperCase();
+                System.out.println(type);
+                if (type.equals("")) { System.out.println("fuckjava");}
+        } while(!type.equals("FILM") && !type.equals("SERIES") && !type.equals("MINISERIES"));
 
 
-        System.out.println("What is the title of the " + type);
-        title = sc.nextLine();
+        System.out.println("What is the title of the " + type + "?");
+        title = sc.nextLine().toUpperCase();
 
         System.out.println("When was the release year of " + title + "?");
         release_year = sc.nextInt();
 
-        System.out.println("What type of tag applies to the viewing? \n(Can be: Comedy/Horror"); //FIX THIS LATER
+        System.out.println("What type of tag applies to the viewing? \n(Can be: Comedy/Horror)"); //FIX THIS LATER
         // do while mexri max arithmo tags h exit.
 
-        int i=0;
+        int i = 0;
         boolean flag = true;
-        while(i < 2 && flag) { //check if user wants to add more tags
-            TagType[i] = sc.nextLine();
-            TagType[i].toUpperCase();
-            System.out.println("Tag applied");
 
+        while(i < 3 && flag) { //check if user wants to add more tags
+            System.out.println("Tag Type " + (i + 1) + ":");
+
+            if (i==0) {sc.nextLine();}
+
+            TagType[i] = sc.nextLine();
+            TagType[i] = TagType[i].toUpperCase();
+            System.out.println("Tag applied " + TagType[i]);
 
             System.out.println("Would you like to add another tag?(YES/NO)");
-            answer = sc.nextLine();
-            answer.toUpperCase();
-            if (answer == "YES") {
-                i++;
-            } else {
-                flag = false;
-            }
-
+            do {
+                answer = sc.nextLine();
+                answer = answer.toUpperCase();
+                if (answer.equals("YES")) {
+                    i++;
+                } else if (answer.equals("NO")) {
+                    flag = false;
+                }
+            } while (!answer.equals("NO") && !answer.equals("YES"));
         }
 
+        if (i==3) { System.out.println("Maximum amount of tags reached"); } //ACCESSORY
+
+
         System.out.println("In which country was " + title + "produced?");
-        country = sc.nextLine();
+        country = sc.nextLine().toUpperCase();
 
         System.out.println("Who directed " + title + "?");
-        directorName = sc.nextLine();
-        directorName.toUpperCase();
+        directorName = sc.nextLine().toUpperCase();
+
 
         int id = -1;
         int counter = 0;
 
         for (director obj : directorList ) {
-            if(obj.getName() == directorName){
+            if(obj.getName().equals(directorName)){
 
                 directorWebsite = obj.getWebsite();
                 directorBCountry = obj.getB_country();
@@ -103,13 +118,11 @@ public class Main {
         }
 
         if (id == -1){
-            System.out.println("Where was " + directorName + "born?");
-            directorBCountry = sc.nextLine();
-            directorBCountry.toUpperCase();
+            System.out.println("Where was " + directorName + " born?");
+            directorBCountry = sc.nextLine().toUpperCase();
 
             System.out.println("What is " + directorName + "'s website?");
-            directorName = sc.nextLine();
-            directorName.toUpperCase();
+            directorWebsite = sc.nextLine().toUpperCase();
 
             director = new director(counter,directorName,directorWebsite,directorBCountry);
 

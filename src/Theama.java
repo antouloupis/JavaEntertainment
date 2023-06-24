@@ -61,21 +61,21 @@ public class Theama {
     }
 
 
-    String showType;
-    String title;
-    int release_year;
-    String[] TagType;
-    String country;
-    director director;
-    ArrayList<actor> actors;
+    private String showType;
+    private String title;
+    private int release_year;
+    private String[] TagType;
+    private String country;
+    private director director;
+    private ArrayList<actor> actors;
 
 }
 
     class series extends Theama {
 
-        int seasons;
-        int episodes;
-        int last_air;
+        private int seasons;
+        private int episodes;
+        private int last_air;
 
         public series(String showType, String title, int release_year, String[] TagType, String country, director director, ArrayList<actor> actors, int seasons, int episodes, int last_air) {
             super(showType,title,release_year,TagType,country,director,actors);
@@ -122,10 +122,10 @@ public class Theama {
             this.b_country = b_country;
         }
 
-        int id;
-        String name;
-        String website;
-        String b_country;
+        private int id;
+        private String name;
+        private String website;
+        private String b_country;
 
 
 
@@ -165,10 +165,10 @@ public class Theama {
 
     class actor{
 
-        int id;
-        String name;
-        String website;
-        String b_country;
+        private int id;
+        private String name;
+        private String website;
+        private String b_country;
 
         public int getId() {
             return id;
