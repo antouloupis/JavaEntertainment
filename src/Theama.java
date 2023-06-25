@@ -2,7 +2,7 @@ import java.util.ArrayList;
 
 public class Theama {
 
-    public Theama(String showType, String title, int release_year, String[] tagType, String country, director director, ArrayList<actor> actors) {
+    public Theama(String showType, String title, int release_year, String[] tagType, String country, Director director, ArrayList<Actor> actors, int id) {
     }
 
 
@@ -38,11 +38,11 @@ public class Theama {
         this.country = country;
     }
 
-    public director getDirector() {
+    public Director getDirector() {
         return director;
     }
 
-    public void setDirector(director director) { this.director = director; }
+    public void setDirector(Director director) { this.director = director; }
 
     public String getShowType() {
         return showType;
@@ -52,33 +52,41 @@ public class Theama {
         this.showType = showType;
     }
 
-    public ArrayList<actor> getActors() {
+    public ArrayList<Actor> getActors() {
         return actors;
     }
 
-    public void setActors(ArrayList<actor> actors) {
+    public void setActors(ArrayList<Actor> actors) {
         this.actors = actors;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     private String showType;
     private String title;
     private int release_year;
     private String[] TagType;
     private String country;
-    private director director;
-    private ArrayList<actor> actors;
+    private Director director;
+    private ArrayList<Actor> actors;
+    private int id;
 
 }
 
-    class series extends Theama {
+    class Series extends Theama {
 
         private int seasons;
         private int episodes;
         private int last_air;
 
-        public series(String showType, String title, int release_year, String[] TagType, String country, director director, ArrayList<actor> actors, int seasons, int episodes, int last_air) {
-            super(showType,title,release_year,TagType,country,director,actors);
+        public Series(String showType, String title, int release_year, String[] TagType, String country, Director director, ArrayList<Actor> actors, int seasons, int episodes, int last_air, int id) {
+            super(showType,title,release_year,TagType,country,director,actors,id);
             this.seasons = seasons;
             this.episodes = episodes;
             this.last_air = last_air;
@@ -113,9 +121,9 @@ public class Theama {
 
 
 
-    class director{
+    class Director{
 
-        public director(int id, String name, String website, String b_country) {
+        public Director(int id, String name, String website, String b_country) {
             this.id = id;
             this.name = name;
             this.website = website;
@@ -163,12 +171,19 @@ public class Theama {
 
     }
 
-    class actor{
+    class Actor{
 
         private int id;
         private String name;
         private String website;
         private String b_country;
+
+        public Actor(int id, String name, String website, String b_country) {
+            this.id = id;
+            this.name = name;
+            this.website = website;
+            this.b_country = b_country;
+        }
 
         public int getId() {
             return id;
