@@ -1,10 +1,27 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class Theama {
 
     public Theama(String showType, String title, int release_year, String[] tagType, String country, Director director, ArrayList<Actor> actors, int id) {
+        this.showType = showType;
+        this.title = title;
+        this.release_year = release_year;
+        TagType = tagType;
+        this.country = country;
+        this.director = director;
+        this.actors = actors;
+        this.id = id;
     }
 
+    private String showType;
+    private String title;
+    private int release_year;
+    private String[] TagType;
+    private String country;
+    private Director director;
+    private ArrayList<Actor> actors;
+    private int id;
 
     public String getTitle() {
         return title;
@@ -68,46 +85,20 @@ public class Theama {
         this.id = id;
     }
 
-    private String showType;
-    private String title;
-    private int release_year;
-    private String[] TagType;
-    private String country;
-    private Director director;
-    private ArrayList<Actor> actors;
-    private int id;
 
 }
 
     class Series extends Theama {
 
-        private int seasons;
-        private int episodes;
+        private ArrayList<Details> details;
         private int last_air;
 
-        public Series(String showType, String title, int release_year, String[] TagType, String country, Director director, ArrayList<Actor> actors, int seasons, int episodes, int last_air, int id) {
+        public Series(String showType, String title, int release_year, String[] TagType, String country, Director director, ArrayList<Actor> actors, ArrayList<Details> details, int last_air, int id) {
             super(showType,title,release_year,TagType,country,director,actors,id);
-            this.seasons = seasons;
-            this.episodes = episodes;
+            this.details = details;
             this.last_air = last_air;
         }
 
-
-        public int getSeasons() {
-            return seasons;
-        }
-
-        public void setSeasons(int seasons) {
-            this.seasons = seasons;
-        }
-
-        public int getEpisodes() {
-            return episodes;
-        }
-
-        public void setEpisodes(int episodes) {
-            this.episodes = episodes;
-        }
 
         public int getLast_air() {
             return last_air;
@@ -115,6 +106,14 @@ public class Theama {
 
         public void setLast_air(int last_air) {
             this.last_air = last_air;
+        }
+
+        public ArrayList<Details> getDetails() {
+            return details;
+        }
+
+        public void setDetails(ArrayList<Details> details) {
+            this.details = details;
         }
     }
 
@@ -219,3 +218,31 @@ public class Theama {
 
     }
 
+    class Details{
+        private int number;
+        private int episodes;
+
+
+
+        public Details(int number, int episodes) {
+            this.number = number;
+            this.episodes = episodes;
+        }
+
+        public int getNumber() {
+            return number;
+        }
+
+
+        public void setNumber(int number) {
+            this.number = number;
+        }
+
+        public int getEpisodes() {
+            return episodes;
+        }
+
+        public void setEpisodes(int episodes) {
+            this.episodes = episodes;
+        }
+    }

@@ -4,28 +4,38 @@ import java.util.Scanner;
 public class Main {
 
     private static Scanner sc = new Scanner(System.in);
-    private static ArrayList<Director> directorList = new ArrayList();
-    private static ArrayList<Actor> actorsList = new ArrayList<>();
-    private static ArrayList<Theama> theamata = new ArrayList<>();
+    static ArrayList<Director> directorList = new ArrayList<>();
+    static ArrayList<Actor> actorsList = new ArrayList<>();
+    static ArrayList<Theama> theamata = new ArrayList<>();
 
 
     public static void main(String[] args) {
         FillWithExamples();
         System.out.println("What would you like to do?\n");
-        int choice;
+        int choice=-5;
         while (true) {
             do {
-                System.out.println("1.Add new viewing\n2.Update viewing\n3.Search and rate\n4.Search for actor or director\n5.EXIT");
-                choice = sc.nextInt();
-            } while (choice < 1 || choice > 4);
+            System.out.println("1. Add new viewing\n2. Update viewing\n3. Search and rate\n4. Search for actor or director\n5. EXIT");
+            try {
+                choice = Integer.parseInt(sc.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number.");
+                continue;
+            }
+            } while (choice < 1 || choice >5);
 
             switch (choice) {
                 case (1):
                     newView();
-                case (5):
+                    break;
+                case(2):
+                    UpdateView();
+                    break;
+                case(5):
+                    System.out.println("Program will now exit");
                     return;
                 default:
-                    System.out.println("Something went wrong");
+                    throw new IllegalStateException("Something went wrong");
 
             }
         }
@@ -45,13 +55,16 @@ public class Main {
         String actorWebsite;
         String actorBCountry;
         String answer;
-        int seasons = 0;
+        Details details;
+        int episodes;
+        int seasons;
         int last_aired = 0;
-        int episodes = 0;
         Director director = null;
         Actor actor = null;
         ArrayList<Actor> movieActors = new ArrayList<>();
         boolean added;
+        int tNum;
+        ArrayList<Details> seasonsAndEpisodes = new ArrayList<>();
 
         do {
             System.out.println("What type of viewing is it?(FILM/SERIES/MINISERIES)");
@@ -201,7 +214,20 @@ public class Main {
 
         if (type.equals("SERIES") || type.equals("MINISERIES")) {
 
-            Series series = new Series(type, title, release_year, TagType, country, director, movieActors, seasons, episodes, last_aired,counter); //read these above
+
+            System.out.println("How many seasons does " + title + " have?");
+            seasons=sc.nextInt();
+
+            for (i = 1; i <= seasons; i++) {
+
+                System.out.println("How many episodes does season " + i + " have?");
+                episodes = sc.nextInt();
+                details = new Details(i,episodes);
+                seasonsAndEpisodes.add(details);
+
+            }
+
+            Series series = new Series(type, title, release_year, TagType, country, director, movieActors, seasonsAndEpisodes, last_aired,counter); //read these above
             theamata.add(series);
 
         } else {
@@ -216,18 +242,88 @@ public class Main {
 
     private static void UpdateView() {
 
+        String input;
+        int actorNum= 0;
+        int seasons = 0;
+        int last_aired = 0;
+        int episodes = 0;
+        Actor actor = null;
+        ArrayList<Actor> movieActors = new ArrayList<>();
+        ArrayList<Details> seasonsAndEpisodes;
+        Details details;
+        boolean added;
+        Series updateSeries=null;
+        int id;
+        boolean isNumber;
+
+        System.out.println("Please provide the ID or TITLE of the series you wish to edit");
+
+        //sc.nextLine();
+
+        input = sc.nextLine();
+
+        isNumber = input.matches("\\d+");
+
+        if (isNumber) {
+            //user provided an id to search for
+            id = Integer.parseInt(input);
+            for (Theama exists : theamata) {
+                if (exists != null && exists.getId() == id && exists.getShowType().equals("SERIES")) {
+                        updateSeries = (Series) exists;
+                        break;
+                }
+            }
+        } else {
+            input = input.toUpperCase();
+            //user provided a string, title to search for
+            for (Theama exists : theamata) {
+                if (exists != null && exists.getTitle().equals(input) && exists.getShowType().equals("SERIES")) {
+                        updateSeries = (Series) exists;
+                        break;
+                }
+            }
+        }
+
+        if (updateSeries != null){
+            seasonsAndEpisodes = updateSeries.getDetails();
+            movieActors = updateSeries.getActors();
+            System.out.println("Series found: " + updateSeries.getTitle());
+
+            for(Details obj: seasonsAndEpisodes) { //count how many seasons total, print ep per seasons
+                seasons++;
+                System.out.println("Season " + seasons + " has " + seasonsAndEpisodes.get(seasons - 1).getEpisodes() + " episodes");
+            }
+            System.out.println();
+            for (Actor obj : movieActors) {
+                actorNum++;
+                System.out.println("Actor named: " + obj.getName() + " is in this series");
+            }
+
+            System.out.println("\nLast year on air was: " + updateSeries.getLast_air());
+
+            System.out.println("What would you like to update?(1. Season/Episodes\n2.Actors\n3.Last year on air");
+
+        } else {
+            System.out.println("Series was not found");
+        }
+
+
+
+
 
 
     }
 
 
     private static void FillWithExamples() {
-        Actor actor = null;
-        Director director = null;
-        Theama theama = null;
+        Actor actor;
+        Director director;
+        Theama theama;
         String[] TagType = new String[3];
         ArrayList<Actor> movieActors = new ArrayList<>();
         Series series = null;
+        ArrayList<Details> detailsArrayList = new ArrayList<>();
+        Details details;
 
         actor = new Actor(1,"RYAN GOSLING","","CANADA");
         actorsList.add(actor);
@@ -283,46 +379,73 @@ public class Main {
         //INTERSTELLAR
         TagType[0] = "SCI-FI";
         TagType[1] = "ADVENTURE";
-        movieActors.set(1,actorsList.get(2));
-        movieActors.set(2,actorsList.get(3));
-        theama = new Theama("FILM","INTERSTELLAR",2014,TagType,"CANADA",directorList.get(1),movieActors,1);
+        movieActors.add(actorsList.get(0));
+        movieActors.add(actorsList.get(1));
+        theama = new Theama("FILM","INTERSTELLAR",2014,TagType,"CANADA",directorList.get(0),movieActors,1);
         theamata.add(theama);
 
         //WOLF OF WALLSTREET
         TagType[0] = "DRAMA";
         TagType[1] = "COMEDY";
-        movieActors.set(1,actorsList.get(2));
-        movieActors.set(2,actorsList.get(4));
-        movieActors.set(3,actorsList.get(8));
-        theama = new Theama("FILM","THE WOLF OF WALLSTREET",2013,TagType,"USA",directorList.get(2),movieActors,2);
+        movieActors = new ArrayList<>();
+        movieActors.add(actorsList.get(1));
+        movieActors.add(actorsList.get(3));
+        movieActors.add(actorsList.get(7));
+        theama = new Theama("FILM","THE WOLF OF WALLSTREET",2013,TagType,"USA",directorList.get(1),movieActors,2);
         theamata.add(theama);
 
         //MAESTRO IN BLUE
+        details = new Details(1,9);
+        detailsArrayList.add(details);
+
         TagType[0] = "DRAMA";
         TagType[1] = null;
-        movieActors.set(1,actorsList.get(5));
-        movieActors.set(2,actorsList.get(6));
-        movieActors.set(3,actorsList.get(7));
-        series = new Series("SERIES","MAESTRO IN BLUE",2022,TagType,"GREECE",directorList.get(3),movieActors,1,9,2022,3);
-        theamata.add(theama);
+        movieActors = new ArrayList<>();
+        movieActors.add(actorsList.get(4));
+        movieActors.add(actorsList.get(5));
+        movieActors.add(actorsList.get(6));
+        series = new Series("SERIES","MAESTRO IN BLUE",2022,TagType,"GREECE",directorList.get(2),movieActors,detailsArrayList,2022,3);
+        theamata.add(series);
 
         //BARBIE
         TagType[0] = "COMEDY";
         TagType[1] = "ROMANCE";
-        movieActors.set(1,actorsList.get(1));
-        movieActors.set(2,actorsList.get(3));
-        movieActors.set(3,actorsList.get(8));
-        theama = new Theama("FILM","BARBIE",2023,TagType,"USA",directorList.get(4),movieActors,4);
+        movieActors = new ArrayList<>();
+        movieActors.add(actorsList.get(0));
+        movieActors.add(actorsList.get(1));
+        movieActors.add(actorsList.get(7));
+        theama = new Theama("FILM","BARBIE",2023,TagType,"USA",directorList.get(3),movieActors,4);
         theamata.add(theama);
 
+
         //BETTER CALL SAUL
+        detailsArrayList = new ArrayList<Details>();
+        details = new Details(1,10);
+        detailsArrayList.add(details);
+
+        details = new Details(2,10);
+        detailsArrayList.add(details);
+
+        details = new Details(3,10);
+        detailsArrayList.add(details);
+
+        details = new Details(4,10);
+        detailsArrayList.add(details);
+
+        details = new Details(5,10);
+        detailsArrayList.add(details);
+
+        details = new Details(6,13);
+        detailsArrayList.add(details);
+
         TagType[0] = "DRAMA";
         TagType[1] = null;
-        movieActors.set(1,actorsList.get(9));
-        movieActors.set(2,actorsList.get(10));
-        movieActors.set(3,actorsList.get(11));
-        series = new Series("SERIES","BETTER CALL SAUL",2015,TagType,"USA",directorList.get(5),movieActors,6,13,2022,5);
-        theamata.add(theama);
+        movieActors = new ArrayList<>();
+        movieActors.add(actorsList.get(8));
+        movieActors.add(actorsList.get(9));
+        movieActors.add(actorsList.get(10));
+        series = new Series("SERIES","BETTER CALL SAUL",2015,TagType,"USA",directorList.get(4),movieActors,detailsArrayList,2022,5);
+        theamata.add(series);
 
 
     }
