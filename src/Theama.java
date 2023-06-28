@@ -3,7 +3,7 @@ import java.util.ArrayList;
 
 public class Theama {
 
-    public Theama(String showType, String title, int release_year, String[] tagType, String country, Director director, ArrayList<Actor> actors, int id) {
+    public Theama(String showType, String title, int release_year, String[] tagType, String country, Director director, ArrayList<Actor> actors, int id,ArrayList<UserRatings> RatingsList, int AverageRating) {
         this.showType = showType;
         this.title = title;
         this.release_year = release_year;
@@ -12,8 +12,13 @@ public class Theama {
         this.director = director;
         this.actors = actors;
         this.id = id;
+        this.AverageRating = AverageRating;
+        this.RatingsList = RatingsList;
     }
 
+
+    private ArrayList<UserRatings> RatingsList;
+    private int AverageRating;
     private String showType;
     private String title;
     private int release_year;
@@ -22,6 +27,22 @@ public class Theama {
     private Director director;
     private ArrayList<Actor> actors;
     private int id;
+
+    public ArrayList<UserRatings> getRatingsList() {
+        return RatingsList;
+    }
+
+    public void setRatingsList(ArrayList<UserRatings> ratingsList) {
+        RatingsList = ratingsList;
+    }
+
+    public int getAverageRating() {
+        return AverageRating;
+    }
+
+    public void setAverageRating(int AverageRating) {
+        this.AverageRating = AverageRating;
+    }
 
     public String getTitle() {
         return title;
@@ -93,8 +114,8 @@ public class Theama {
         private ArrayList<Details> details;
         private int last_air;
 
-        public Series(String showType, String title, int release_year, String[] TagType, String country, Director director, ArrayList<Actor> actors, ArrayList<Details> details, int last_air, int id) {
-            super(showType,title,release_year,TagType,country,director,actors,id);
+        public Series(String showType, String title, int release_year, String[] TagType, String country, Director director, ArrayList<Actor> actors, ArrayList<Details> details, int last_air, int id,ArrayList<UserRatings> RatingsList, int AverageRating) {
+            super(showType,title,release_year,TagType,country,director,actors,id,RatingsList,AverageRating);
             this.details = details;
             this.last_air = last_air;
         }
@@ -117,8 +138,68 @@ public class Theama {
         }
     }
 
+    class User {
 
+        private String username;
+        private String password;
+        private String email;
 
+        public User(String username, String password, String email) {
+            this.username = username;
+            this.password = password;
+            this.email = email;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+    }
+
+    class UserRatings{
+        private String username;
+        private int rating;
+
+        public UserRatings(String username, int rating) {
+            this.username = username;
+            this.rating = rating;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public int getRating() {
+            return rating;
+        }
+
+        public void setRating(int rating) {
+            this.rating = rating;
+        }
+    }
 
     class Director{
 
