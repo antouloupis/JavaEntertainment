@@ -1,11 +1,9 @@
-
-import java.time.Year;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
 
-    private static Scanner sc = new Scanner(System.in);
+    private static final Scanner sc = new Scanner(System.in);
     static ArrayList<Director> directorList = new ArrayList<>();
     static ArrayList<Actor> actorsList = new ArrayList<>();
     static ArrayList<Theama> theamata = new ArrayList<>();
@@ -48,9 +46,9 @@ public class Main {
 
         boolean isNumber;
         String input;
-        int year=0;
-        Theama Viewing = null;
-        ArrayList<Theama> YearViews =  new ArrayList<>();;
+        int year;
+        Theama Viewing;
+        ArrayList<Theama> YearViews =  new ArrayList<>();
         ArrayList<Details> seasonDetails;
         int counter;
         User user=null;
@@ -77,7 +75,7 @@ public class Main {
             for (Theama exists : theamata) {
                 if (exists != null && exists.getRelease_year() == (year)) {
                     if (exists instanceof Series) {
-                        YearViews.add((Series) exists);
+                        YearViews.add(exists);
                     } else {
                         YearViews.add(exists);
                     }
@@ -90,7 +88,7 @@ public class Main {
             for (Theama exists : theamata) {
                 if (exists != null && exists.getTitle().equals(input)) {
                     if (exists instanceof Series) {
-                        YearViews.add((Series) exists);
+                        YearViews.add(exists);
                     } else {
                         YearViews.add(exists);
                     }
@@ -106,11 +104,8 @@ public class Main {
                 System.out.println("Id: " + obj.getId() + ", title: " + obj.getTitle() + ", release year: " + obj.getRelease_year() + ", type: " + obj.getShowType() + ", director: " + obj.getDirector().getName() + ", average rating: " + obj.getAverageRating());
                 if (obj instanceof Series) {
                     Series series = (Series) obj;
-                    counter = 0;
                     seasonDetails = series.getDetails();
-                    for (Details details : seasonDetails) {
-                        counter++;
-                    }
+                    counter=seasonDetails.size();
                     System.out.println("Last on air: " + series.getLast_air() + ", total seasons: " + counter);
                 }
             }//PRINT ALL DETAILS
@@ -178,7 +173,7 @@ public class Main {
                                 System.out.println("Viewing not found please try again");
                             }
 
-                    } while (Viewing == null); //do untill viewing is found
+                    } while (Viewing == null); //do until viewing is found
 
             } else {
                 System.out.println("Login/Signup error");
@@ -208,7 +203,7 @@ public class Main {
 
         return user;
 
-    }//endof search
+    }//end of search
 
     private static User SignIn(int tries) { //tries to sign in if not found then sign up
 
@@ -314,23 +309,21 @@ public class Main {
 
     private static void newView() {
 
-        String type = null;
+        String type;
         String title;
-        int release_year=-1;
+        int release_year;
         String[] TagType = new String[3];
         String country;
         String directorName;
-        String directorWebsite = "";
+        String directorWebsite;
         String directorBCountry;
         String answer;
         Details details;
         int episodes;
         int seasons;
-        int last_aired = -1;
-        Director director = null;
+        int last_aired;
+        Director director;
         ArrayList<Actor> movieActors = new ArrayList<>();
-        boolean added;
-        int tNum;
         ArrayList<Details> seasonsAndEpisodes = new ArrayList<>();
 
         do {
@@ -410,12 +403,7 @@ public class Main {
             last_aired = CheckIfNumber();
         } while(last_aired < 1888);
 
-
-        counter=0;
-
-        for (Theama viewing : theamata) {
-            counter++;
-        }
+        counter= theamata.size();
 
 
         System.out.println("Name some of the actors playing in " + title);
@@ -474,19 +462,13 @@ public class Main {
 
     private static void UpdateView() {
 
-        String input;
         int actorNum= 0;
         int seasons = 0;
-        int last_aired = 0;
-        int episodes = 0;
-        Actor actor = null;
-        ArrayList<Actor> movieActors = new ArrayList<>();
+        int last_aired;
+        ArrayList<Actor> movieActors;
         ArrayList<Details> seasonsAndEpisodes;
-        Details details;
-        boolean added;
-        Series updateSeries=null;
-        int id=0;
-        boolean isNumber;
+        Series updateSeries;
+        int id;
 
         System.out.println("Please provide the ID or TITLE of the series you wish to edit");
         updateSeries = (Series) ReplyIDorTITLE("SERIES");
@@ -499,7 +481,7 @@ public class Main {
 
             for(Details obj: seasonsAndEpisodes) { //count how many seasons total, print ep per seasons
                 seasons++;
-                System.out.println("Season " + seasons + " has " + seasonsAndEpisodes.get(seasons - 1).getEpisodes() + " episodes");
+                System.out.println("Season " + seasons + " has " + obj.getEpisodes() + " episodes");
             }
             System.out.println();
             for (Actor obj : movieActors) {
@@ -596,7 +578,7 @@ public class Main {
 
     private static void addActor(ArrayList<Actor> movieActors, Series series, int totalActors) {
 
-        Actor actor=null;
+        Actor actor;
         int counter;
         String actorName;
         boolean added;
@@ -612,7 +594,8 @@ public class Main {
             actorName = sc.nextLine().toUpperCase();
 
             counter = 0;
-        if(movieActors!=null) {
+
+            if(movieActors!=null) {
             for (Actor exists : movieActors) {
                 if (exists.getName().equals(actorName)) {
                     System.out.println("Actor has already been added to " + series.getTitle());
@@ -620,7 +603,7 @@ public class Main {
                     break;
                 }
             }
-        }
+
             if (!added) { //not added to this specific theama
                 for (Actor obj : actorsList) { //search if actor exists in actorlist
                     if (obj.getName().equals(actorName)) {
@@ -644,7 +627,7 @@ public class Main {
                 }
                 System.out.println("Actor added to "+series.getTitle() +", " + actorName);
             }
-
+        }
             do { //ask if user wants to add another actor
                 System.out.println("Would you like to add another actor?(YES/NO)");
                 answer = sc.nextLine().toUpperCase();
@@ -669,7 +652,7 @@ public class Main {
 
     private static void AddSeason(int totalSeasons, ArrayList<Details> detailsArrayList) {
 
-        int episodes=-1;
+        int episodes;
 
         System.out.println("How many episodes does the new season (" + (totalSeasons + 1) + ") have? If unsure type 0");
         do {
@@ -685,7 +668,7 @@ public class Main {
 
         int season=-1;
         Details details=null;
-        int episodes=-1;
+        int episodes;
 
 
         do {
@@ -718,7 +701,7 @@ public class Main {
         Theama theama;
         String[] TagType = new String[3];
         ArrayList<Actor> movieActors = new ArrayList<>();
-        Series series = null;
+        Series series;
         ArrayList<Details> detailsArrayList = new ArrayList<>();
         Details details;
         User user;
@@ -860,7 +843,7 @@ public class Main {
 
 
         //BETTER CALL SAUL
-        detailsArrayList = new ArrayList<Details>();
+        detailsArrayList = new ArrayList<>();
         details = new Details(1,10);
         detailsArrayList.add(details);
 
