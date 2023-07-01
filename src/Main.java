@@ -1,5 +1,5 @@
-import org.jetbrains.annotations.NotNull;
 
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -10,6 +10,7 @@ public class Main {
     static ArrayList<Actor> actorsList = new ArrayList<>();
     static ArrayList<Theama> theamata = new ArrayList<>();
     static ArrayList<User> UserList = new ArrayList<>();
+    private static User LoggedIn=null;
 
 
     public static void main(String[] args) {
@@ -30,6 +31,9 @@ public class Main {
                 case(2):
                     UpdateView();
                     break;
+                case(3):
+                    LoggedIn = SearchAndRate(LoggedIn);
+                    break;
                 case(5):
                     System.out.println("Program will now exit");
                     return;
@@ -38,6 +42,274 @@ public class Main {
 
             }
         }
+    }
+
+    private static User SearchAndRate(User LoggedIn) {
+
+        boolean isNumber;
+        String input;
+        int year=0;
+        Theama Viewing = null;
+        ArrayList<Theama> YearViews =  new ArrayList<>();;
+        ArrayList<Details> seasonDetails;
+        int counter;
+        User user=null;
+        int rating=0;
+        ArrayList<UserRatings> localRatings;
+        int ratedCounter=0;
+        int ratingTotal=0;
+        int ratingAverage;
+        boolean found=false;
+        int reply;
+
+
+        System.out.println("Please provide the release year or title");
+
+        do {
+            input = sc.nextLine();
+        } while (input==null);
+
+        isNumber = input.matches("\\d+");
+
+        if (isNumber) {
+            //user provided a year to search for
+            year = Integer.parseInt(input);
+            for (Theama exists : theamata) {
+                if (exists != null && exists.getRelease_year() == (year)) {
+                    if (exists instanceof Series) {
+                        YearViews.add((Series) exists);
+                    } else {
+                        YearViews.add(exists);
+                    }
+                    found=true;
+                }
+            }
+        } else {
+            input = input.toUpperCase();
+            //user provided a string, title to search for
+            for (Theama exists : theamata) {
+                if (exists != null && exists.getTitle().equals(input)) {
+                    if (exists instanceof Series) {
+                        YearViews.add((Series) exists);
+                    } else {
+                        YearViews.add(exists);
+                    }
+                    found=true;
+                }
+            }
+        }
+
+        if (found) {
+
+
+            for (Theama obj : YearViews) {
+                System.out.println("Id: " + obj.getId() + ", title: " + obj.getTitle() + ", release year: " + obj.getRelease_year() + ", type: " + obj.getShowType() + ", director: " + obj.getDirector().getName() + ", average rating: " + obj.getAverageRating());
+                if (obj instanceof Series) {
+                    Series series = (Series) obj;
+                    counter = 0;
+                    seasonDetails = series.getDetails();
+                    for (Details details : seasonDetails) {
+                        counter++;
+                    }
+                    System.out.println("Last on air: " + series.getLast_air() + ", total seasons: " + counter);
+                }
+            }//PRINT ALL DETAILS
+
+
+            System.out.println("Would you like to rate any of the views?(YES/NO)");
+
+            do { //read user answer
+                input = sc.nextLine().toUpperCase();
+            } while (!input.equals("NO") && !input.equals("YES"));
+
+            if (input.equals("YES")) {
+                if (LoggedIn == null) { //check if user is logged in
+                    System.out.println("You must sign in first!");
+                    System.out.println("Would you like to \n1.Sign Up\n2.Sign In");
+                    do{
+                        reply = CheckIfNumber();
+                    } while (reply!=1 && reply!=2);
+                    if (reply ==1){
+                        user = SignUp();
+                    } else {
+                        user = SignIn(0);
+                    }
+                } else {
+                    user = LoggedIn;
+                }
+
+                if (user != null) {
+
+                    do {
+                        System.out.println("Please type the TITLE or ID of the show you want to rate");
+                        Viewing = (Theama) ReplyIDorTITLE(null);
+
+                        if (Viewing != null) {
+                            localRatings = Viewing.getRatingsList();
+
+                            for (UserRatings obj : localRatings) {//count users that rated and total rating score
+                                ratedCounter++;
+                                ratingTotal = ratingTotal + obj.getRating();
+                                if (obj.getUser().getEmail().equals(user.getEmail())) {
+                                    System.out.println("You have already rated this show, rating: " + obj.getRating());
+                                    rating = obj.getRating();
+                                }
+                            }
+
+                            if (rating == 0) {
+                                System.out.println("What rating would you like to give to " + Viewing.getTitle());
+
+                                do {
+                                    rating = sc.nextInt();
+                                } while (rating < 1 || rating > 10);
+
+                                UserRatings newRating = new UserRatings(user, rating);
+                                localRatings.add(newRating);
+                                Viewing.setRatingsList(localRatings);
+                                //account for new rating
+                                ratedCounter++;
+                                ratingTotal = ratingTotal + rating;
+                                ratingAverage = ratingTotal / ratedCounter;
+                                Viewing.setAverageRating(ratingAverage);
+                                System.out.println("Rating added successfully");
+
+                            }
+                        } else{
+                                System.out.println("Viewing not found please try again");
+                            }
+
+                    } while (Viewing == null); //do untill viewing is found
+
+            } else {
+                System.out.println("Login/Signup error");
+            }
+        } else {  //user dont wanna rate
+                System.out.println("Would you like to see detailed reviews about a viewing?(YES/NO)");
+                do { //read user answer
+                    input = sc.nextLine().toUpperCase();
+                } while (!input.equals("NO") && !input.equals("YES"));
+
+                if (input.equals("YES")){
+                    System.out.println("Please type viewing ID or TITLE");
+                    Viewing = (Theama) ReplyIDorTITLE(null);
+                    if (Viewing!=null){
+                        System.out.println("Reviews for "+Viewing.getTitle()+":");
+                        localRatings = Viewing.getRatingsList();
+                        for (UserRatings obj : localRatings){
+                            System.out.println(obj.getUser().getUsername() + " " + obj.getRating());
+                        }
+                    }
+                }
+
+            }
+        } else {
+            System.out.println("No viewings found");
+        }
+
+        return user;
+
+    }//endof search
+
+    private static User SignIn(int tries) { //tries to sign in if not found then sign up
+
+        User user=null;
+        String input;
+        String password;
+        boolean invalid = false;
+        int reply;
+
+        System.out.println("Please type your email");
+        do {
+            input = sc.nextLine();
+        } while (input==null || input.matches("\\d+"));
+
+        input = input.toUpperCase(); //make uppercase
+
+        System.out.println("Please type your password (case sensitive)");
+
+        do { //check if email exists
+            password = sc.nextLine();
+
+        if(password!=null) {
+            for (User obj : UserList) {
+                if (input.equals(obj.getEmail()) && password.equals(obj.getPassword())) { //if both correct return user object
+                    System.out.println("Login was successful. Welcome " + obj.getUsername());
+                    return obj; //USER WAS FOUND AND IS RETURNED
+                } else if (input.equals(obj.getEmail())) { //if it does , but password mismatch, ask for password again
+                    invalid = true; //flag to check if email exists
+                    System.out.println("Password is invalid");
+                    break;
+                }
+            }
+        }
+        } while (invalid);
+        //if you are here then email was wrong or user dont exist
+
+        System.out.println("Email does not correspond to a user:" +input);
+        if (tries<1) {
+            System.out.println("Would you like to\n1.Sign up\n2.Retry\n3.Exit back to main program");
+        } else {
+            System.out.println("Would you like to\n2.Retry\n3.Exit back to main program");
+        }
+        do {
+            reply = CheckIfNumber();
+        } while (reply!=1 && reply!=2 && reply!=3);
+
+        if (reply==1 && tries<1){ //Sign up and, if user has tried once or more to login , ignore
+            return SignUp();
+        } else if (reply==2){
+            tries++;
+            if (tries>2){//if tries are more than 2 return null
+                System.out.println("Too many wrong tries!");
+                return null;
+            }
+            user = SignIn(tries);//time for user to retry
+        }
+        return user;
+    }
+
+    private static User SignUp(){
+
+        String input;
+        String password;
+        String username;
+        User user;
+
+        System.out.println("Please provide your email address");
+
+        do {
+            input = sc.nextLine();
+
+            for(User obj : UserList) {
+                if (input.toUpperCase().equals(obj.getEmail())){
+                    System.out.println("Email was found, please type another email");
+                    break;
+                }
+            }
+
+        } while (input==null || input.matches("\\d+"));
+
+        input = input.toUpperCase();
+
+        System.out.println("Please type your password");
+
+        do {
+            password = sc.nextLine();
+        } while (password==null);
+
+        System.out.println("Please provide your full name");
+        do {
+            username = sc.nextLine();
+        } while (username==null || username.matches("\\d+"));
+
+        username = username.toUpperCase();
+
+        user = new User(username,password,input);
+        UserList.add(user);
+        System.out.println("User added successfully: "+username);
+
+        return user;
+
     }
 
     private static void newView() {
@@ -188,9 +460,10 @@ public class Main {
         int number = -1;
         int tries=0;
         do {
+            tries++;
         try {
             number = Integer.parseInt(sc.nextLine());
-            tries++;
+
         } catch (NumberFormatException e){
             if (tries>0) {
                 System.out.println("Please type a number");
@@ -198,7 +471,6 @@ public class Main {
         } } while(number < 0);
         return number;
     }
-
 
     private static void UpdateView() {
 
@@ -217,32 +489,8 @@ public class Main {
         boolean isNumber;
 
         System.out.println("Please provide the ID or TITLE of the series you wish to edit");
+        updateSeries = (Series) ReplyIDorTITLE("SERIES");
 
-        //sc.nextLine();
-
-        input = sc.nextLine();
-
-        isNumber = input.matches("\\d+");
-
-        if (isNumber) {
-            //user provided an id to search for
-            id = Integer.parseInt(input);
-            for (Theama exists : theamata) {
-                if (exists != null && exists.getId() == (id) && exists.getShowType().equals("SERIES")) {
-                        updateSeries = (Series) exists;
-                        break;
-                }
-            }
-        } else {
-            input = input.toUpperCase();
-            //user provided a string, title to search for
-            for (Theama exists : theamata) {
-                if (exists != null && exists.getTitle().equals(input) && exists.getShowType().equals("SERIES")) {
-                        updateSeries = (Series) exists;
-                        break;
-                }
-            }
-        }
 
         if (updateSeries != null){
             seasonsAndEpisodes = updateSeries.getDetails();
@@ -263,7 +511,7 @@ public class Main {
 
 
             do {
-                System.out.println("What would you like to update?(1.Season/Episodes 2.Add actors 3.Last year on air");
+                System.out.println("What would you like to update?(1.Season/Episodes 2.Add actors 3.Last year on air)");
 
                     id = CheckIfNumber();
 
@@ -305,6 +553,45 @@ public class Main {
 
 
 
+    }
+
+    private static Object ReplyIDorTITLE(String type) { //for when user wants to find a theama based on either name or id
+
+        boolean isNumber;
+        String input;
+        int id;
+        Object updateSeries=null;
+
+        if (type==null){
+            type = "I";
+        }
+
+
+        input = sc.nextLine();
+
+        isNumber = input.matches("\\d+");
+
+        if (isNumber) {
+            //user provided an id to search for
+            id = Integer.parseInt(input);
+            for (Theama exists : theamata) {
+                if (exists != null && exists.getId() == (id) && exists.getShowType().contains(type)) {
+                        updateSeries = exists;
+                        break;
+                }
+            }
+        } else {
+            input = input.toUpperCase();
+            //user provided a string, title to search for
+            for (Theama exists : theamata) {
+                if (exists != null && exists.getTitle().equals(input) && exists.getShowType().contains(type)) {
+                    updateSeries = exists;
+                    break;
+                }
+            }
+        }
+
+        return updateSeries;
     }
 
     private static void addActor(ArrayList<Actor> movieActors, Series series, int totalActors) {
@@ -380,7 +667,7 @@ public class Main {
 
     }
 
-    private static void AddSeason(int totalSeasons,@NotNull ArrayList<Details> detailsArrayList) {
+    private static void AddSeason(int totalSeasons, ArrayList<Details> detailsArrayList) {
 
         int episodes=-1;
 
@@ -394,7 +681,7 @@ public class Main {
         System.out.println("Season added successfully: " + (totalSeasons+1) +", episodes: " + episodes);
     }
 
-    private static void ChangeSeasonDetails(int totalSeasons, @NotNull ArrayList<Details> detailsArrayList) {
+    private static void ChangeSeasonDetails(int totalSeasons, ArrayList<Details> detailsArrayList) {
 
         int season=-1;
         Details details=null;
@@ -425,7 +712,6 @@ public class Main {
 
     }
 
-
     private static void FillWithExamples() {
         Actor actor;
         Director director;
@@ -440,13 +726,13 @@ public class Main {
         ArrayList<UserRatings> RatingsList = new ArrayList<>();
         int averageRating;
 
-        user = new User("JohnDoe","password","john@doe.gr");
+        user = new User("JOHNDOE","password","JOHN@DOE.GR");
         UserList.add(user);
 
-        user = new User("Babis3","babispao13","babis13@gmail.com");
+        user = new User("BABIS3","babispao13","BABIS13@GMAIL.COM");
         UserList.add(user);
 
-        user = new User("Miku","$@!aaa3399","miku@sony.com");
+        user = new User("MIKU","$@!aaa3399","MIKU@SONY.COM");
         UserList.add(user);
 
         actor = new Actor(1,"RYAN GOSLING","","CANADA");
@@ -505,11 +791,11 @@ public class Main {
         TagType[1] = "ADVENTURE";
         movieActors.add(actorsList.get(0));
         movieActors.add(actorsList.get(1));
-        userRatings = new UserRatings(UserList.get(0).getUsername(),10);
+        userRatings = new UserRatings(UserList.get(0),10);
         RatingsList.add(userRatings);
-        userRatings = new UserRatings(UserList.get(1).getUsername(),9);
+        userRatings = new UserRatings(UserList.get(1),9);
         RatingsList.add(userRatings);
-        userRatings = new UserRatings(UserList.get(2).getUsername(),10);
+        userRatings = new UserRatings(UserList.get(2),10);
         RatingsList.add(userRatings);
         averageRating = ((10+9+10)/3);
         theama = new Theama("FILM","INTERSTELLAR",2014,TagType,"CANADA",directorList.get(0),movieActors,1,RatingsList,averageRating);
@@ -523,11 +809,11 @@ public class Main {
         movieActors.add(actorsList.get(3));
         movieActors.add(actorsList.get(7));
         RatingsList = new ArrayList<>();
-        userRatings = new UserRatings(UserList.get(0).getUsername(),9);
+        userRatings = new UserRatings(UserList.get(0),9);
         RatingsList.add(userRatings);
-        userRatings = new UserRatings(UserList.get(1).getUsername(),8);
+        userRatings = new UserRatings(UserList.get(1),8);
         RatingsList.add(userRatings);
-        userRatings = new UserRatings(UserList.get(2).getUsername(),7);
+        userRatings = new UserRatings(UserList.get(2),7);
         RatingsList.add(userRatings);
         averageRating = ((9+7+8)/3);
         theama = new Theama("FILM","THE WOLF OF WALLSTREET",2013,TagType,"USA",directorList.get(1),movieActors,2,RatingsList,averageRating);
@@ -544,11 +830,11 @@ public class Main {
         movieActors.add(actorsList.get(5));
         movieActors.add(actorsList.get(6));
         RatingsList = new ArrayList<>();
-        userRatings = new UserRatings(UserList.get(0).getUsername(),10);
+        userRatings = new UserRatings(UserList.get(0),10);
         RatingsList.add(userRatings);
-        userRatings = new UserRatings(UserList.get(1).getUsername(),10);
+        userRatings = new UserRatings(UserList.get(1),10);
         RatingsList.add(userRatings);
-        userRatings = new UserRatings(UserList.get(2).getUsername(),10);
+        userRatings = new UserRatings(UserList.get(2),10);
         RatingsList.add(userRatings);
         averageRating = ((10+10+10)/3);
         series = new Series("SERIES","MAESTRO IN BLUE",2022,TagType,"GREECE",directorList.get(2),movieActors,detailsArrayList,2022,3,RatingsList,averageRating);
@@ -562,11 +848,11 @@ public class Main {
         movieActors.add(actorsList.get(1));
         movieActors.add(actorsList.get(7));
         RatingsList = new ArrayList<>();
-        userRatings = new UserRatings(UserList.get(0).getUsername(),7);
+        userRatings = new UserRatings(UserList.get(0),7);
         RatingsList.add(userRatings);
-        userRatings = new UserRatings(UserList.get(1).getUsername(),5);
+        userRatings = new UserRatings(UserList.get(1),5);
         RatingsList.add(userRatings);
-        userRatings = new UserRatings(UserList.get(2).getUsername(),8);
+        userRatings = new UserRatings(UserList.get(2),8);
         RatingsList.add(userRatings);
         averageRating = ((7+5+8)/3);
         theama = new Theama("FILM","BARBIE",2023,TagType,"USA",directorList.get(3),movieActors,4,RatingsList,averageRating);
@@ -600,11 +886,11 @@ public class Main {
         movieActors.add(actorsList.get(9));
         movieActors.add(actorsList.get(10));
         RatingsList = new ArrayList<>();
-        userRatings = new UserRatings(UserList.get(0).getUsername(),9);
+        userRatings = new UserRatings(UserList.get(0),9);
         RatingsList.add(userRatings);
-        userRatings = new UserRatings(UserList.get(1).getUsername(),10);
+        userRatings = new UserRatings(UserList.get(1),10);
         RatingsList.add(userRatings);
-        userRatings = new UserRatings(UserList.get(2).getUsername(),9);
+        userRatings = new UserRatings(UserList.get(2),9);
         RatingsList.add(userRatings);
         averageRating = ((9+10+9)/3);
         series = new Series("SERIES","BETTER CALL SAUL",2015,TagType,"USA",directorList.get(4),movieActors,detailsArrayList,2022,5,RatingsList,averageRating);

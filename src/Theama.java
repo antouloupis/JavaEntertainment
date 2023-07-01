@@ -176,21 +176,23 @@ public class Theama {
     }
 
     class UserRatings{
-        private String username;
+        public User getUser() {
+            return user;
+        }
+
+        public void setUser(User user) {
+            this.user = user;
+        }
+
+        private User user;
         private int rating;
 
-        public UserRatings(String username, int rating) {
-            this.username = username;
+        public UserRatings(User user, int rating) {
+            this.user = user;
             this.rating = rating;
+
         }
 
-        public String getUsername() {
-            return username;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
 
         public int getRating() {
             return rating;
