@@ -4,8 +4,8 @@ import java.util.Scanner;
 public class Main {
 
     private static final Scanner sc = new Scanner(System.in);
-    static ArrayList<Director> directorList = new ArrayList<>();
-    static ArrayList<Actor> actorsList = new ArrayList<>();
+    static ArrayList<Person> directorList = new ArrayList<>();
+    static ArrayList<Person> actorsList = new ArrayList<>();
     static ArrayList<Theama> theamata = new ArrayList<>();
     static ArrayList<User> UserList = new ArrayList<>();
     private static User LoggedIn=null;
@@ -17,10 +17,9 @@ public class Main {
         int choice;
         while (true) {
             do {
-            System.out.println("1. Add new viewing\n2. Update viewing\n3. Search and rate\n4. Search for actor or director\n5. EXIT");
+            System.out.println("1. Add new viewing\n2. Update viewing\n3. Search and rate\n4. Search for actor or director\n5. View favorite actors and directors\n6. EXIT");
             choice = CheckIfNumber();
-
-            } while (choice < 1 || choice >5);
+            } while (choice < 1 || choice >6);
 
             switch (choice) {
                 case (1):
@@ -32,13 +31,39 @@ public class Main {
                 case(3):
                     LoggedIn = SearchAndRate(LoggedIn);
                     break;
+                case(4):
+                    LoggedIn = SearchForPerson(LoggedIn);
+                    break;
                 case(5):
+                    if (LoggedIn==null) {
+                        System.out.println("You must sign in first!");
+                        LoggedIn = SignIn(0);
+                        }
+                        if (LoggedIn==null){
+                            System.out.println("Login/Sign up error");
+                        } else {
+                            ViewFavorites(LoggedIn);
+                        }
+                    break;
+                case(6):
                     System.out.println("Program will now exit");
                     return;
                 default:
                     throw new IllegalStateException("Something went wrong");
 
             }
+        }
+    }
+
+    private static void ViewFavorites(User loggedIn) {
+
+        if (loggedIn.getFavorites()!=null) {
+            System.out.println("Your favorites are:");
+            for (Person person : loggedIn.getFavorites()){
+                System.out.println(person.getName());
+            }
+        } else {
+            System.out.println("You have no favorites :(");
         }
     }
 
@@ -205,6 +230,110 @@ public class Main {
 
     }//end of search
 
+    private static User SearchForPerson(User loggedIn) {
+
+        Person person=null;
+        String input;
+        ArrayList<Theama> works;
+        int reply;
+        int avgRating=-1;
+        Theama avgTheama=null;
+        ArrayList<Person> favorites;
+        boolean found=false;
+
+        System.out.println("Please type the person's name:");
+
+        do{
+            input = sc.nextLine().toUpperCase();
+        } while (input.matches("\\d+"));
+
+        for (Person obj : actorsList){
+            if (obj.getName().equals(input)){
+                person = obj;
+                break;
+            }
+        }
+
+        if (person ==null){
+            for (Person obj:directorList){
+                if (obj.getName().equals(input)){
+                    person = obj;
+                    break;
+                }
+            }
+        }
+
+        if (person==null){
+            System.out.println("Person not found: " +input);
+        } else {
+                works = person.getWorks();
+                System.out.println("Id: " + person.getId()+", Name: "+person.getName()+", worked on:");
+
+            for (Theama theama : works ){ //print their works
+                System.out.println(theama.getTitle());
+                avgRating = theama.getAverageRating();
+            }
+
+            System.out.println("1. View best rated work\n2. View worst rated work\n3. Add to favorites");
+
+            do {
+                reply=CheckIfNumber();
+            } while(reply!=1 && reply!=2 && reply!=3);
+
+            if (reply==1) {
+
+               for (Theama theama : works){
+               if (theama.getAverageRating() >= avgRating){
+                   avgRating= theama.getAverageRating();
+                   avgTheama = theama;
+
+                    }
+                }
+                System.out.println(("Best work is: "+ avgTheama.getTitle()+", rated:"+avgRating));
+            } else if (reply==2){ //reply ==2 worst rating
+                avgRating=10;
+
+                for (Theama theama : works) {
+                    if (theama.getAverageRating() <= avgRating) {
+                        avgRating = theama.getAverageRating();
+                        avgTheama = theama;
+
+                    }
+                }
+                System.out.println(("Worst rated work is: "+ avgTheama.getTitle()+", rated:"+avgRating));
+            } else {
+                if (loggedIn == null) { //attempt user sign in/sign up
+                    System.out.println("You must sign in first!");
+                    loggedIn = SignIn(0);
+                }
+
+                if (loggedIn != null) {//user may still be null
+                    if (loggedIn.getFavorites() != null) {
+                    for (Person obj : loggedIn.getFavorites()) { //search if already in favorites list
+                        if (obj.getName().equals(person.getName())) {
+                            System.out.println(person.getName() + " is already in your favorites");
+                            found = true;
+                            break;
+                            }
+                        }
+                    }
+                    //person not in list
+                    if (!found) {
+                        favorites = loggedIn.getFavorites();
+                        favorites.add(person);
+                        loggedIn.setFavorites(favorites);
+                        System.out.println("Added to favorites: " + person.getName());
+                    }
+                } else  {
+                    System.out.println("Login/Signup error");
+                }
+            }
+
+            }
+
+        return loggedIn;
+    }
+
     private static User SignIn(int tries) { //tries to sign in if not found then sign up
 
         User user=null;
@@ -299,7 +428,7 @@ public class Main {
 
         username = username.toUpperCase();
 
-        user = new User(username,password,input);
+        user = new User(username,password,input,null);
         UserList.add(user);
         System.out.println("User added successfully: "+username);
 
@@ -322,9 +451,10 @@ public class Main {
         int episodes;
         int seasons;
         int last_aired;
-        Director director;
-        ArrayList<Actor> movieActors = new ArrayList<>();
+        Person director;
+        ArrayList<Person> movieActors = new ArrayList<>();
         ArrayList<Details> seasonsAndEpisodes = new ArrayList<>();
+        ArrayList<Theama> WorkList = new ArrayList<>();
 
         do {
             System.out.println("What type of viewing is it?(FILM/SERIES/MINISERIES)");
@@ -343,11 +473,13 @@ public class Main {
         boolean flag = true;
 
         while (i < 3 && flag) { //check if user wants to add more tags
-            System.out.println("What type of tag applies to the viewing? \n(Can be: Comedy/Horror)");
+            System.out.println("What type of tag applies to the viewing? \n(Drama, Comedy, Thriller, Romance, Horror, Romcom, Crime)");
             System.out.println("Tag Type " + (i + 1) + ":");
 
-            TagType[i] = sc.nextLine();
-            TagType[i] = TagType[i].toUpperCase();
+            do {
+                TagType[i] = sc.nextLine();
+                TagType[i] = TagType[i].toUpperCase();
+            } while(!TagType[i].equals("DRAMA") && !TagType[i].equals("COMEDY") && !TagType[i].equals("THRILLER") && !TagType[i].equals("ROMANCE") && !TagType[i].equals("HORROR") && !TagType[i].equals("ROMCOM") && !TagType[i].equals("CRIME"));
             System.out.println("Tag applied " + TagType[i]);
 
 
@@ -368,16 +500,20 @@ public class Main {
 
 
         System.out.println("In which country was " + title + " produced?");
-        country = sc.nextLine().toUpperCase();
+        do {
+            country = sc.nextLine().toUpperCase();
+        } while (country.matches("\\d+"));
 
         System.out.println("Who directed " + title + "?");
-        directorName = sc.nextLine().toUpperCase();
+        do {
+            directorName = sc.nextLine().toUpperCase();
+        } while (directorName.matches("\\d+"));
 
 
         int id = -1;
         int counter = 0;
 
-        for (Director obj : directorList) {
+        for (Person obj : directorList) {
             if (obj.getName().equals(directorName)) {
                 id = obj.getId();
                 break;
@@ -387,12 +523,17 @@ public class Main {
 
         if (id == -1) {
             System.out.println("Where was " + directorName + " born?");
-            directorBCountry = sc.nextLine().toUpperCase();
+            do {
+                directorBCountry = sc.nextLine().toUpperCase();
+            } while (directorBCountry.matches("\\d+"));
+
 
             System.out.println("What is " + directorName + "'s website?");
-            directorWebsite = sc.nextLine().toUpperCase();
+            do {
+                directorWebsite = sc.nextLine().toUpperCase();
+            } while (directorWebsite.matches("\\d+"));
 
-            director = new Director(counter, directorName, directorWebsite, directorBCountry);//maybe it should be counter--
+            director = new Person(counter, directorName, directorWebsite, directorBCountry,WorkList);//maybe it should be counter--
 
         } else {
             director = directorList.get(counter);
@@ -406,7 +547,7 @@ public class Main {
         counter= theamata.size();
 
 
-        System.out.println("Name some of the actors playing in " + title);
+        System.out.println("Name some of the actors playing in: " + title);
         Series series = new Series(type, title, release_year, TagType, country, director, movieActors, seasonsAndEpisodes, last_aired,counter,null,-1);
         addActor(movieActors,series,0);
 
@@ -434,11 +575,18 @@ public class Main {
 
              //read these above
             theamata.add(series);
+            WorkList = director.getWorks(); //get existing works
+            WorkList.add(series); //account for this one
+            director.setWorks(WorkList); //return it to the object
+
 
         } else {
 
             Theama theama = new Theama(type, title, release_year, TagType, country, director, movieActors,counter,null,-1);
             theamata.add(theama);
+            WorkList = director.getWorks(); //get existing works
+            WorkList.add(theama); //account for this one
+            director.setWorks(WorkList); //return it to the object
         }
 
 
@@ -465,7 +613,7 @@ public class Main {
         int actorNum= 0;
         int seasons = 0;
         int last_aired;
-        ArrayList<Actor> movieActors;
+        ArrayList<Person> movieActors;
         ArrayList<Details> seasonsAndEpisodes;
         Series updateSeries;
         int id;
@@ -484,9 +632,9 @@ public class Main {
                 System.out.println("Season " + seasons + " has " + obj.getEpisodes() + " episodes");
             }
             System.out.println();
-            for (Actor obj : movieActors) {
+            for (Person obj : movieActors) {
                 actorNum++;
-                System.out.println("Actor named: " + obj.getName() + " is in this series");
+                System.out.println("Person.Actor named: " + obj.getName() + " is in this series");
             }
 
             System.out.println("\nLast year on air was: " + updateSeries.getLast_air());
@@ -576,9 +724,9 @@ public class Main {
         return updateSeries;
     }
 
-    private static void addActor(ArrayList<Actor> movieActors, Series series, int totalActors) {
+    private static void addActor(ArrayList<Person> movieActors, Series series, int totalActors) {
 
-        Actor actor;
+        Person actor;
         int counter;
         String actorName;
         boolean added;
@@ -586,6 +734,7 @@ public class Main {
         String country;
         String actorWebsite;
         String answer;
+        ArrayList<Theama> appearsIn;
 
         while (totalActors < 10 && flag) { //check if user wants to add another actor
             added = false;
@@ -596,7 +745,7 @@ public class Main {
             counter = 0;
 
             if(movieActors!=null) {
-            for (Actor exists : movieActors) {
+            for (Person exists : movieActors) {
                 if (exists.getName().equals(actorName)) {
                     System.out.println("Actor has already been added to " + series.getTitle());
                     added = true;
@@ -605,9 +754,11 @@ public class Main {
             }
 
             if (!added) { //not added to this specific theama
-                for (Actor obj : actorsList) { //search if actor exists in actorlist
+                appearsIn = new ArrayList<>();
+                for (Person obj : actorsList) { //search if actor exists in actorlist
                     if (obj.getName().equals(actorName)) {
                         actor = obj;
+                        appearsIn = obj.getWorks();
                         break;
                     }
                     counter++;
@@ -618,14 +769,16 @@ public class Main {
 
                     System.out.println("What is " + actorName + "'s website?");
                     actorWebsite = sc.nextLine().toUpperCase();
-
-                    actor = new Actor(counter, actorName, actorWebsite, country);
+                    appearsIn.add(series); //account for this series
+                    actor = new Person(counter, actorName, actorWebsite, country,appearsIn);
                     actorsList.add(actor);
                     movieActors.add(actor);
                 } else {
+                    appearsIn.add(series);
+                    actor.setWorks(appearsIn);//update actors arraylist
                     movieActors.add(actor);
                 }
-                System.out.println("Actor added to "+series.getTitle() +", " + actorName);
+                System.out.println("Person.Actor added to "+series.getTitle() +", " + actorName);
             }
         }
             do { //ask if user wants to add another actor
@@ -696,11 +849,11 @@ public class Main {
     }
 
     private static void FillWithExamples() {
-        Actor actor;
-        Director director;
+        Person actor;
+        Person director;
         Theama theama;
         String[] TagType = new String[3];
-        ArrayList<Actor> movieActors = new ArrayList<>();
+        ArrayList<Person> movieActors = new ArrayList<>();
         Series series;
         ArrayList<Details> detailsArrayList = new ArrayList<>();
         Details details;
@@ -708,72 +861,90 @@ public class Main {
         UserRatings userRatings;
         ArrayList<UserRatings> RatingsList = new ArrayList<>();
         int averageRating;
+        ArrayList<Theama> works = new ArrayList<>();
+        ArrayList<Person> favorites = new ArrayList<>();
 
-        user = new User("JOHNDOE","password","JOHN@DOE.GR");
+
+        actor = new Person(1,"RYAN GOSLING","","CANADA",works);
+        actorsList.add(actor);
+
+        actor = new Person(2,"MATTHEW MCCONAUGHEY","GREENLIGHTS.COM","USA",works);
+        actorsList.add(actor);
+
+        actor = new Person(3,"ANNE HATHAWAY","","USA",works);
+        actorsList.add(actor);
+
+        actor = new Person(4,"LEONARDO DICAPRIO","","USA",works);
+        actorsList.add(actor);
+
+        actor = new Person(5,"CHRISTOFOROS PAPAKALIATIS","","GREECE",works);
+        actorsList.add(actor);
+
+        actor = new Person(6,"KLELIA ANDRIOLATOU","","GREECE",works);
+        actorsList.add(actor);
+
+        actor = new Person(7,"ORESTIS CHALKIAS","","GREECE",works);
+        actorsList.add(actor);
+
+        actor = new Person(8,"MARGOT ROBBIE","","AUSTRALIA",works);
+        actorsList.add(actor);
+
+        actor = new Person(9,"BOB ODENKIRK","","USA",works);
+        actorsList.add(actor);
+
+        actor = new Person(10,"RHEA SEEHORN","","USA",works);
+        actorsList.add(actor);
+
+        actor = new Person(11,"GIANCARLO ESPOSITO","","USA",works);
+        actorsList.add(actor);
+
+        //DIRECTORS
+
+        director = new Person(1,"CHRISTOPHER NOLAN","","UNITED KINGDOM",works);
+        directorList.add(director);
+
+        director = new Person(2,"MARTIN SCORSESE","","USA",works);
+        directorList.add(director);
+
+        director = new Person(3,"CHRISTOFOROS PAPAKALIATIS","","GREECE",works);
+        directorList.add(director);
+
+        director = new Person(4,"GRETA GERWIG","","USA",works);
+        directorList.add(director);
+
+        director = new Person(5,"GEORGE VINCENT GILLIGAN JR.","","USA",works);
+        directorList.add(director);
+
+        //USERS
+
+        favorites.add(actorsList.get(0));
+        favorites.add(actorsList.get(5));
+        favorites.add(directorList.get(2));
+        user = new User("JOHNDOE","password","JOHN@DOE.GR", favorites);
         UserList.add(user);
 
-        user = new User("BABIS3","babispao13","BABIS13@GMAIL.COM");
+        favorites = new ArrayList<>();
+        favorites.add(actorsList.get(1));
+        favorites.add(actorsList.get(10));
+        favorites.add(actorsList.get(3));
+        favorites.add(directorList.get(0));
+        user = new User("BABIS3","babispao13","BABIS13@GMAIL.COM",favorites);
         UserList.add(user);
 
-        user = new User("MIKU","$@!aaa3399","MIKU@SONY.COM");
+        favorites = new ArrayList<>();
+        favorites.add(actorsList.get(2));
+        favorites.add(actorsList.get(4));
+        favorites.add(actorsList.get(9));
+        favorites.add(actorsList.get(7));
+        user = new User("MIKU","$@!aaa3399","MIKU@SONY.COM",favorites);
         UserList.add(user);
-
-        actor = new Actor(1,"RYAN GOSLING","","CANADA");
-        actorsList.add(actor);
-
-        actor = new Actor(2,"MATTHEW MCCONAUGHEY","GREENLIGHTS.COM","USA");
-        actorsList.add(actor);
-
-        actor = new Actor(3,"ANNE HATHAWAY","","USA");
-        actorsList.add(actor);
-
-        actor = new Actor(4,"LEONARDO DICAPRIO","","USA");
-        actorsList.add(actor);
-
-        actor = new Actor(5,"CHRISTOFOROS PAPAKALIATIS","","GREECE");
-        actorsList.add(actor);
-
-        actor = new Actor(6,"KLELIA ANDRIOLATOU","","GREECE");
-        actorsList.add(actor);
-
-        actor = new Actor(7,"ORESTIS CHALKIAS","","GREECE");
-        actorsList.add(actor);
-
-        actor = new Actor(8,"MARGOT ROBBIE","","AUSTRALIA");
-        actorsList.add(actor);
-
-        actor = new Actor(9,"BOB ODENKIRK","","USA");
-        actorsList.add(actor);
-
-        actor = new Actor(10,"RHEA SEEHORN","","USA");
-        actorsList.add(actor);
-
-        actor = new Actor(11,"GIANCARLO ESPOSITO","","USA");
-        actorsList.add(actor);
-
-
-        director = new Director(1,"CHRISTOPHER NOLAN","","UNITED KINGDOM");
-        directorList.add(director);
-
-        director = new Director(2,"MARTIN SCORSESE","","USA");
-        directorList.add(director);
-
-        director = new Director(3,"CHRISTOFOROS PAPAKALIATIS","","GREECE");
-        directorList.add(director);
-
-        director = new Director(4,"GRETA GERWIG","","USA");
-        directorList.add(director);
-
-        director = new Director(5,"GEORGE VINCENT GILLIGAN JR.","","USA");
-        directorList.add(director);
-
 
 
         //INTERSTELLAR
         TagType[0] = "SCI-FI";
         TagType[1] = "ADVENTURE";
-        movieActors.add(actorsList.get(0));
         movieActors.add(actorsList.get(1));
+        movieActors.add(actorsList.get(2));
         userRatings = new UserRatings(UserList.get(0),10);
         RatingsList.add(userRatings);
         userRatings = new UserRatings(UserList.get(1),9);
@@ -783,6 +954,11 @@ public class Main {
         averageRating = ((10+9+10)/3);
         theama = new Theama("FILM","INTERSTELLAR",2014,TagType,"CANADA",directorList.get(0),movieActors,1,RatingsList,averageRating);
         theamata.add(theama);
+        works = new ArrayList<>();
+        works.add(theama);
+        directorList.get(0).setWorks(works);
+
+
 
         //WOLF OF WALLSTREET
         TagType[0] = "DRAMA";
@@ -801,6 +977,11 @@ public class Main {
         averageRating = ((9+7+8)/3);
         theama = new Theama("FILM","THE WOLF OF WALLSTREET",2013,TagType,"USA",directorList.get(1),movieActors,2,RatingsList,averageRating);
         theamata.add(theama);
+
+        works = new ArrayList<>();
+        works.add(theama);
+        directorList.get(1).setWorks(works);
+
 
         //MAESTRO IN BLUE
         details = new Details(1,9);
@@ -823,12 +1004,17 @@ public class Main {
         series = new Series("SERIES","MAESTRO IN BLUE",2022,TagType,"GREECE",directorList.get(2),movieActors,detailsArrayList,2022,3,RatingsList,averageRating);
         theamata.add(series);
 
+        works = new ArrayList<>();
+        works.add(series);
+        directorList.get(2).setWorks(works);
+
+
         //BARBIE
         TagType[0] = "COMEDY";
         TagType[1] = "ROMANCE";
         movieActors = new ArrayList<>();
         movieActors.add(actorsList.get(0));
-        movieActors.add(actorsList.get(1));
+        movieActors.add(actorsList.get(2));
         movieActors.add(actorsList.get(7));
         RatingsList = new ArrayList<>();
         userRatings = new UserRatings(UserList.get(0),7);
@@ -840,6 +1026,11 @@ public class Main {
         averageRating = ((7+5+8)/3);
         theama = new Theama("FILM","BARBIE",2023,TagType,"USA",directorList.get(3),movieActors,4,RatingsList,averageRating);
         theamata.add(theama);
+
+        works = new ArrayList<>();
+        works.add(theama);
+        directorList.get(3).setWorks(works);
+
 
 
         //BETTER CALL SAUL
@@ -878,6 +1069,66 @@ public class Main {
         averageRating = ((9+10+9)/3);
         series = new Series("SERIES","BETTER CALL SAUL",2015,TagType,"USA",directorList.get(4),movieActors,detailsArrayList,2022,5,RatingsList,averageRating);
         theamata.add(series);
+
+        works = new ArrayList<>();
+        works.add(series);
+        directorList.get(4).setWorks(works);
+        //RYAN GOSLING
+        works = new ArrayList<>();
+        works.add(theamata.get(3));
+
+        actorsList.get(0).setWorks(works);
+        //MATHEW
+        works = new ArrayList<>();
+        works.add(theamata.get(0));
+        works.add(theamata.get(1));
+
+        actorsList.get(1).setWorks(works);
+
+        //ANNE HATHAWAY
+        works = new ArrayList<>();
+        works.add(theamata.get(0));
+        works.add(theamata.get(3));
+
+        actorsList.get(2).setWorks(works);
+
+        //LEONARDO
+        works = new ArrayList<>();
+        works.add(theamata.get(1));
+
+        actorsList.get(3).setWorks(works);
+
+        //PAPAKALIATIS
+        works = new ArrayList<>();
+        works.add(theamata.get(2));
+
+        actorsList.get(4).setWorks(works);
+        directorList.get(2).setWorks(works);
+        //KLELIA
+        actorsList.get(5).setWorks(works);
+        //ORESTIS
+        actorsList.get(6).setWorks(works);
+
+        //MARGOT ROBBIE
+        works = new ArrayList<>();
+        works.add(theamata.get(1));
+        works.add(theamata.get(3));
+
+        actorsList.get(7).setWorks(works);
+
+        //saul crew
+        works = new ArrayList<>();
+        works.add(theamata.get(4));
+
+        actorsList.get(8).setWorks(works);
+        actorsList.get(9).setWorks(works);
+        actorsList.get(10).setWorks(works);
+
+
+
+
+
+
 
 
     }

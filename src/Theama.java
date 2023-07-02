@@ -1,9 +1,8 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class Theama {
 
-    public Theama(String showType, String title, int release_year, String[] tagType, String country, Director director, ArrayList<Actor> actors, int id,ArrayList<UserRatings> RatingsList, int AverageRating) {
+    public Theama(String showType, String title, int release_year, String[] tagType, String country, Person director, ArrayList<Person> actors, int id, ArrayList<UserRatings> RatingsList, int AverageRating) {
         this.showType = showType;
         this.title = title;
         this.release_year = release_year;
@@ -24,8 +23,8 @@ public class Theama {
     private int release_year;
     private String[] TagType;
     private String country;
-    private Director director;
-    private ArrayList<Actor> actors;
+    private Person director;
+    private ArrayList<Person> actors;
     private int id;
 
     public ArrayList<UserRatings> getRatingsList() {
@@ -76,11 +75,11 @@ public class Theama {
         this.country = country;
     }
 
-    public Director getDirector() {
+    public Person getDirector() {
         return director;
     }
 
-    public void setDirector(Director director) { this.director = director; }
+    public void setDirector(Person director) { this.director = director; }
 
     public String getShowType() {
         return showType;
@@ -90,11 +89,11 @@ public class Theama {
         this.showType = showType;
     }
 
-    public ArrayList<Actor> getActors() {
+    public ArrayList<Person> getActors() {
         return actors;
     }
 
-    public void setActors(ArrayList<Actor> actors) {
+    public void setActors(ArrayList<Person> actors) {
         this.actors = actors;
     }
 
@@ -114,7 +113,7 @@ public class Theama {
         private ArrayList<Details> details;
         private int last_air;
 
-        public Series(String showType, String title, int release_year, String[] TagType, String country, Director director, ArrayList<Actor> actors, ArrayList<Details> details, int last_air, int id,ArrayList<UserRatings> RatingsList, int AverageRating) {
+        public Series(String showType, String title, int release_year, String[] TagType, String country, Person director, ArrayList<Person> actors, ArrayList<Details> details, int last_air, int id, ArrayList<UserRatings> RatingsList, int AverageRating) {
             super(showType,title,release_year,TagType,country,director,actors,id,RatingsList,AverageRating);
             this.details = details;
             this.last_air = last_air;
@@ -138,42 +137,7 @@ public class Theama {
         }
     }
 
-    class User {
 
-        private String username;
-        private String password;
-        private String email;
-
-        public User(String username, String password, String email) {
-            this.username = username;
-            this.password = password;
-            this.email = email;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-    }
 
     class UserRatings{
         public User getUser() {
@@ -203,105 +167,8 @@ public class Theama {
         }
     }
 
-    class Director{
 
-        public Director(int id, String name, String website, String b_country) {
-            this.id = id;
-            this.name = name;
-            this.website = website;
-            this.b_country = b_country;
-        }
-
-        private int id;
-        private String name;
-        private String website;
-        private String b_country;
-
-
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getWebsite() {
-            return website;
-        }
-
-        public void setWebsite(String website) {
-            this.website = website;
-        }
-
-        public String getB_country() {
-            return b_country;
-        }
-
-        public void setB_country(String b_country) {
-            this.b_country = b_country;
-        }
-
-        public int getId() {
-            return id;
-        }
-
-        public void setId(int id) {
-            this.id = id;
-        }
-
-    }
-
-    class Actor{
-
-        private int id;
-        private String name;
-        private String website;
-        private String b_country;
-
-        public Actor(int id, String name, String website, String b_country) {
-            this.id = id;
-            this.name = name;
-            this.website = website;
-            this.b_country = b_country;
-        }
-
-        public int getId() {
-            return id;
-        }
-
-        public void setId(int id) {
-            this.id = id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getWebsite() {
-            return website;
-        }
-
-        public void setWebsite(String website) {
-            this.website = website;
-        }
-
-        public String getB_country() {
-            return b_country;
-        }
-
-        public void setB_country(String b_country) {
-            this.b_country = b_country;
-        }
-
-    }
-
-    class Details{
+class Details{
         private int number;
         private int episodes;
 
