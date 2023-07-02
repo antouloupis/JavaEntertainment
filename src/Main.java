@@ -4,24 +4,24 @@ import java.util.Scanner;
 public class Main {
 
     private static final Scanner sc = new Scanner(System.in);
-    static ArrayList<Person> directorList = new ArrayList<>();
-    static ArrayList<Person> actorsList = new ArrayList<>();
-    static ArrayList<Theama> theamata = new ArrayList<>();
-    static ArrayList<User> UserList = new ArrayList<>();
-    private static User LoggedIn=null;
+    static ArrayList<Person> directorList = new ArrayList<>(); //stores all directors globally
+    static ArrayList<Person> actorsList = new ArrayList<>(); //'' '' actors globally
+    static ArrayList<Theama> theamata = new ArrayList<>();//stores all types of views (film series miniseries)
+    static ArrayList<User> UserList = new ArrayList<>();//stores all users
+    private static User LoggedIn=null;//stores if user is logged in or not
 
 
     public static void main(String[] args) {
-        FillWithExamples();
+        FillWithExamples(); //hardcoded users,actors,directors,theamata,series
         System.out.println("What would you like to do?\n");
         int choice;
-        while (true) {
+        while (true) { //loop until user presses 6
             do {
             System.out.println("1. Add new viewing\n2. Update viewing\n3. Search and rate\n4. Search for actor or director\n5. View favorite actors and directors\n6. EXIT");
             choice = CheckIfNumber();
-            } while (choice < 1 || choice >6);
+            } while (choice < 1 || choice >6); //check user input via calling method CheckIfNumber
 
-            switch (choice) {
+            switch (choice) { //switch case for functions
                 case (1):
                     newView();
                     break;
@@ -459,20 +459,21 @@ public class Main {
         do {
             System.out.println("What type of viewing is it?(FILM/SERIES/MINISERIES)");
             type = sc.nextLine().toUpperCase();
-        } while (!type.equals("FILM") && !type.equals("SERIES") && !type.equals("MINISERIES"));
+        } while (!type.equals("FILM") && !type.equals("SERIES") && !type.equals("MINISERIES")); //read until input matches film, series or miniseries
 
 
         System.out.println("What is the title of the " + type + "?");
         title = sc.nextLine().toUpperCase();
 
         System.out.println("When was the release year of " + title + "?");
-        release_year = CheckIfNumber();
-           
+        do {
+            release_year = CheckIfNumber(); //again, check if input is numerical
+        } while(release_year<1888); //year 1888 was the year a movie was first released (according to google)
 
         int i = 0;
         boolean flag = true;
 
-        while (i < 3 && flag) { //check if user wants to add more tags
+        while (i < 3 && flag) { //check if user wants to add more tags, flag means user said no, i counts how many tags have been added so far
             System.out.println("What type of tag applies to the viewing? \n(Drama, Comedy, Thriller, Romance, Horror, Romcom, Crime)");
             System.out.println("Tag Type " + (i + 1) + ":");
 
@@ -480,14 +481,14 @@ public class Main {
                 TagType[i] = sc.nextLine();
                 TagType[i] = TagType[i].toUpperCase();
             } while(!TagType[i].equals("DRAMA") && !TagType[i].equals("COMEDY") && !TagType[i].equals("THRILLER") && !TagType[i].equals("ROMANCE") && !TagType[i].equals("HORROR") && !TagType[i].equals("ROMCOM") && !TagType[i].equals("CRIME"));
-            System.out.println("Tag applied " + TagType[i]);
+            System.out.println("Tag applied " + TagType[i]); //check if input matches any of the tags provided
 
 
             do {
-                System.out.println("Would you like to add another tag?(YES/NO)");
+                System.out.println("Would you like to add another tag?(YES/NO)");//does user wanna add a tag?
                 answer = sc.nextLine().toUpperCase();
                 if (answer.equals("YES")) {
-                    i++;
+                    i++;//i counts how many tags have been added to a viewing
                 } else if (answer.equals("NO")) {
                     flag = false;
                 }
@@ -496,46 +497,46 @@ public class Main {
 
         if (i == 3) {
             System.out.println("Maximum amount of tags reached");
-        } //ACCESSORY
+        } //let users know why they couldnt add more tags
 
 
         System.out.println("In which country was " + title + " produced?");
         do {
             country = sc.nextLine().toUpperCase();
-        } while (country.matches("\\d+"));
+        } while (country.matches("\\d+")); //check if input is NOT numerical
 
         System.out.println("Who directed " + title + "?");
         do {
             directorName = sc.nextLine().toUpperCase();
-        } while (directorName.matches("\\d+"));
+        } while (directorName.matches("\\d+"));//check if input is NOT numerical
 
 
         int id = -1;
         int counter = 0;
 
         for (Person obj : directorList) {
-            if (obj.getName().equals(directorName)) {
+            if (obj.getName().equals(directorName)) { //if director is found, get id
                 id = obj.getId();
                 break;
             }
-            counter++;
+            counter++;//counts how many persons in the list
         }
 
-        if (id == -1) {
+        if (id == -1) { //id was initialized to -1, so if director was not found, ask for more details
             System.out.println("Where was " + directorName + " born?");
             do {
                 directorBCountry = sc.nextLine().toUpperCase();
-            } while (directorBCountry.matches("\\d+"));
+            } while (directorBCountry.matches("\\d+"));//check if input is NOT numerical
 
 
             System.out.println("What is " + directorName + "'s website?");
             do {
                 directorWebsite = sc.nextLine().toUpperCase();
-            } while (directorWebsite.matches("\\d+"));
+            } while (directorWebsite.matches("\\d+"));//check if input is NOT numerical
 
-            director = new Person(counter, directorName, directorWebsite, directorBCountry,WorkList);//maybe it should be counter--
+            director = new Person(counter, directorName, directorWebsite, directorBCountry,WorkList);//create new director Person
 
-        } else {
+        } else {//director was found, get from the list
             director = directorList.get(counter);
         }
 
@@ -549,7 +550,8 @@ public class Main {
 
         System.out.println("Name some of the actors playing in: " + title);
         Series series = new Series(type, title, release_year, TagType, country, director, movieActors, seasonsAndEpisodes, last_aired,counter,null,-1);
-        addActor(movieActors,series,0);
+        addActor(movieActors,series,0); //this method adds actors, takes for input the arraylist movieactors (so which actors are in a series), a series object (theama) and how many actors it already has
+        //in this case, since its a new viewing actors are 0
 
 
 
@@ -568,7 +570,7 @@ public class Main {
                     episodes = CheckIfNumber();
                 } while(episodes<0);
 
-                details = new Details(i,episodes);
+                details = new Details(i,episodes); //details object contains season and how many episodes, each details item is one season
                 seasonsAndEpisodes.add(details);
 
             }
@@ -592,7 +594,7 @@ public class Main {
 
     }
 
-    private static int CheckIfNumber() {
+    private static int CheckIfNumber() { //simple method returning int to check if input was numerical, do until input is numerical
         int number = -1;
         int tries=0;
         do {
@@ -619,7 +621,7 @@ public class Main {
         int id;
 
         System.out.println("Please provide the ID or TITLE of the series you wish to edit");
-        updateSeries = (Series) ReplyIDorTITLE("SERIES");
+        updateSeries = (Series) ReplyIDorTITLE("SERIES"); //method search based on ID or title, input is type of viewing we are looking for (series film miniseries)
 
 
         if (updateSeries != null){
@@ -692,7 +694,7 @@ public class Main {
         int id;
         Object updateSeries=null;
 
-        if (type==null){
+        if (type==null){ //if nothing was provided search for all of them (i is contained in all of fIlm serIes mIniseries)
             type = "I";
         }
 
@@ -721,7 +723,7 @@ public class Main {
             }
         }
 
-        return updateSeries;
+        return updateSeries; //return a object, can be theama or series or null
     }
 
     private static void addActor(ArrayList<Person> movieActors, Series series, int totalActors) {
@@ -744,18 +746,18 @@ public class Main {
 
             counter = 0;
 
-            if(movieActors!=null) {
+            if(movieActors!=null) { //if the series already has a list of actors check if the name given is in the list
             for (Person exists : movieActors) {
                 if (exists.getName().equals(actorName)) {
                     System.out.println("Actor has already been added to " + series.getTitle());
-                    added = true;
+                    added = true; //if it is , flag it true
                     break;
                 }
             }
 
-            if (!added) { //not added to this specific theama
+            if (!added) { //actor name provided is not added to this specific theama
                 appearsIn = new ArrayList<>();
-                for (Person obj : actorsList) { //search if actor exists in actorlist
+                for (Person obj : actorsList) { //search if actor exists in actor list global
                     if (obj.getName().equals(actorName)) {
                         actor = obj;
                         appearsIn = obj.getWorks();
@@ -763,20 +765,24 @@ public class Main {
                     }
                     counter++;
                 }
-                if (actor==null) { //if actor not found in actor list
+                if (actor==null) { //if actor not found in global actor list, create new
                     System.out.println("Where was " + actorName + " born?");
-                    country = sc.nextLine().toUpperCase();
+                    do {
+                        country = sc.nextLine().toUpperCase();
+                    } while (country.matches("\\d+"));
 
                     System.out.println("What is " + actorName + "'s website?");
-                    actorWebsite = sc.nextLine().toUpperCase();
+                    do {
+                        actorWebsite = sc.nextLine().toUpperCase();
+                    } while (actorWebsite.matches("\\d+"));
                     appearsIn.add(series); //account for this series
-                    actor = new Person(counter, actorName, actorWebsite, country,appearsIn);
-                    actorsList.add(actor);
-                    movieActors.add(actor);
+                    actor = new Person(counter, actorName, actorWebsite, country,appearsIn); //create new actor object
+                    actorsList.add(actor);//add to global list
+                    movieActors.add(actor);// add to specific theama list
                 } else {
-                    appearsIn.add(series);
-                    actor.setWorks(appearsIn);//update actors arraylist
-                    movieActors.add(actor);
+                    appearsIn.add(series); //actor was found in global list
+                    actor.setWorks(appearsIn);//update actors work list
+                    movieActors.add(actor); //add actor to theama list
                 }
                 System.out.println("Person.Actor added to "+series.getTitle() +", " + actorName);
             }
@@ -793,7 +799,7 @@ public class Main {
                 } else {
                     System.out.println("Maximum amount of actors reached.");
                     flag = false;
-                    totalActors++;
+                    totalActors++;//counts total actors added
                 }
             } while (!answer.equals("YES") && !answer.equals("NO"));
 
